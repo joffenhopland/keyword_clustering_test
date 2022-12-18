@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 class Api {
   String api = 'https://keyword-clustering-func-htphw67dca-uc.a.run.app/';
   String api2 = 'keyword-clustering-func-htphw67dca-uc.a.run.app';
+  String api3 = '10.0.0.12:8080';
+
 
 
   Future clusterKeywords(reqBody) async {
@@ -14,11 +16,12 @@ class Api {
           'Accept': 'application/json',
         },
         body: jsonEncode(reqBody));
-    print('req body: ${response.body}');
-    print('Status code post request: ${response.statusCode}');
+
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      print('response body: ${response.body}');
+      print('Status code post request: ${response.statusCode}');
+      return response.body;
     } else {
       throw Exception('Api post request failed');
     }
