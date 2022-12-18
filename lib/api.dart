@@ -9,8 +9,9 @@ class Api {
 
 
 
-  Future clusterKeywords(reqBody) async {
-    final response = await http.post(Uri.https(api2, '/'),
+  Future clusterKeywords(reqBody, String language, String country) async {
+    print(api3+'?language=$language&country=$country');
+    final response = await http.post(Uri.https(api2, '', {'language':language, 'country':country}),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

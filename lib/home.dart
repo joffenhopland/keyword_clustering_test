@@ -20,33 +20,36 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+List<String> langList = ['en', 'no'];
+List<String> countryList = ['us', 'no'];
+
 class _HomeState extends State<Home> {
-  final reqBody = [
-    {
-      "Keyword": "student loan forgiveness",
-      "Volume": "1000000",
-      "Keyword Difficulty": "96",
-      "CPC (USD)": "1.84",
-      "Competitive Density": "0",
-      "Number of Results": "179000000",
-      "Intent": "Informational",
-      "SERP Features":
-          "Site links, FAQ, Top stories, People also ask, Video carousel",
-      "Trend": "0.13,0.08,0.08,0.07,0.10,0.16,0.29,0.24,0.20,0.66,0.44,1.00"
-    },
-    {
-      "Keyword": "student loans",
-      "Volume": "1000000",
-      "Keyword Difficulty": "100",
-      "CPC (USD)": "7.94",
-      "Competitive Density": "0.31",
-      "Number of Results": "545000000",
-      "Intent": "Informational, Transactional",
-      "SERP Features":
-          "Reviews, FAQ, Top stories, People also ask, Video carousel, Knowledge panel, Adwords top",
-      "Trend": "0.08,0.29,0.16,0.10,0.29,0.36,0.24,0.24,0.29,1.00,0.10,0.13"
-    }
-  ];
+  // final reqBody = [
+  //   {
+  //     "Keyword": "student loan forgiveness",
+  //     "Volume": "1000000",
+  //     "Keyword Difficulty": "96",
+  //     "CPC (USD)": "1.84",
+  //     "Competitive Density": "0",
+  //     "Number of Results": "179000000",
+  //     "Intent": "Informational",
+  //     "SERP Features":
+  //         "Site links, FAQ, Top stories, People also ask, Video carousel",
+  //     "Trend": "0.13,0.08,0.08,0.07,0.10,0.16,0.29,0.24,0.20,0.66,0.44,1.00"
+  //   },
+  //   {
+  //     "Keyword": "student loans",
+  //     "Volume": "1000000",
+  //     "Keyword Difficulty": "100",
+  //     "CPC (USD)": "7.94",
+  //     "Competitive Density": "0.31",
+  //     "Number of Results": "545000000",
+  //     "Intent": "Informational, Transactional",
+  //     "SERP Features":
+  //         "Reviews, FAQ, Top stories, People also ask, Video carousel, Knowledge panel, Adwords top",
+  //     "Trend": "0.08,0.29,0.16,0.10,0.29,0.36,0.24,0.24,0.29,1.00,0.10,0.13"
+  //   }
+  // ];
   Uint8List uploadedCsv = Uint8List(0);
   String option1Text = "";
   Future<dynamic>? response;
@@ -59,12 +62,61 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
+  String dropdownValueLang = langList.first;
+  String dropdownValueCountry = countryList.first;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Text("Select language"),
+          DropdownButton<String>(
+            value: dropdownValueLang,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            style: const TextStyle(color: Colors.deepPurple),
+            underline: Container(
+              height: 2,
+              color: Colors.deepPurpleAccent,
+            ),
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                dropdownValueLang = value!;
+              });
+            },
+            items: langList.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+          Text("Select country"),
+          DropdownButton<String>(
+            value: dropdownValueCountry,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            style: const TextStyle(color: Colors.deepPurple),
+            underline: Container(
+              height: 2,
+              color: Colors.deepPurpleAccent,
+            ),
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                dropdownValueCountry = value!;
+              });
+            },
+            items: countryList.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
           ElevatedButton(
               onPressed: ()
                   // Api().clusterKeywords(reqBody);
@@ -100,7 +152,10 @@ class _HomeState extends State<Home> {
                         fieldsMap = CsvToMapConverter()
                             .convert(utf8.decode(uploadedCsv));
                         print(fieldsMap);
-                        response = Api().clusterKeywords(fieldsMap);
+                        print(dropdownValueLang);
+                        print(dropdownValueCountry);
+                        response = Api().clusterKeywords(
+                            fieldsMap, dropdownValueLang, dropdownValueCountry);
                         print('uploadedCSV is now ' +
                             utf8.decode(
                                 uploadedCsv)); // utf8.decode returns the UInt8List to readable csv
@@ -125,11 +180,7 @@ class _HomeState extends State<Home> {
                 if (snapshot.hasData) {
                   String jsonList = snapshot.data;
                   List jsonListDecoded = json.decode(jsonList);
-
-
-                  print("jsonListDecoded: ${jsonListDecoded[0].runtimeType}");
                   List<List<dynamic>> rows = [];
-
                   List<dynamic> row = [];
                   row.add("Cluster");
                   row.add("Keywords");
@@ -142,7 +193,8 @@ class _HomeState extends State<Home> {
                     row.add(jsonListDecoded[i]["Keywords"]);
                     if (jsonListDecoded[i]["Total monthly volume"] != null) {
                       row.add(jsonListDecoded[i]["Total monthly volume"]);
-                    } else if (jsonListDecoded[i]["Total search results"] != null) {
+                    } else if (jsonListDecoded[i]["Total search results"] !=
+                        null) {
                       row.add(jsonListDecoded[i]["Total monthly volume"]);
                     }
                     rows.add(row);
@@ -156,7 +208,6 @@ class _HomeState extends State<Home> {
                   return SingleChildScrollView(
                     child: Container(
                       child: Column(
-
                         children: [
                           Text("Response: ${snapshot.data}"),
                           JsonTable(
@@ -173,11 +224,12 @@ class _HomeState extends State<Home> {
                           ),
                           ElevatedButton(
                               onPressed: () {
-                                AnchorElement(
-                                    href: url)
-                                  ..setAttribute("download", "topclusters-keywords-clustered.csv")
+                                AnchorElement(href: url)
+                                  ..setAttribute("download",
+                                      "topclusters-keywords-clustered.csv")
                                   ..click();
-                              }, child: Text("Download CSV"))
+                              },
+                              child: Text("Download CSV"))
                         ],
                       ),
                     ),
