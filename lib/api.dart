@@ -6,12 +6,13 @@ class Api {
   String api = 'https://keyword-clustering-func-htphw67dca-uc.a.run.app/';
   String api2 = 'keyword-clustering-func-htphw67dca-uc.a.run.app';
   String api3 = '10.0.0.12:8080';
+  String api4 = 'kw-clustering-common-links-google-api-htphw67dca-uc.a.run.app';
 
 
 
   Future clusterKeywords(reqBody, String language, String country) async {
-    print(api3+'?language=$language&country=$country');
-    final response = await http.post(Uri.https(api2, '', {'language':language, 'country':country}),
+    // print(api3+'?language=$language&country=$country');
+    final response = await http.post(Uri.https(api4, '', {'language':language, 'country':country}),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
